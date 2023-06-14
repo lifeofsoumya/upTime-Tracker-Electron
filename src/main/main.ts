@@ -9,11 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, screen  } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, screen } from 'electron';
+// import os from 'os-utils';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+
+const os = require('os');
 
 class AppUpdater {
   constructor() {
@@ -88,7 +91,7 @@ const createWindow = async () => {
     backgroundColor: '#FFF',
     transparent: true,
   });
-  
+
   // const { width, height } = mainWindow.getBounds();
   // const borderWidth = 10;
 
@@ -101,34 +104,39 @@ const createWindow = async () => {
 
   // mainWindow.setShape(rectangle);
 
-  let isDragging = false;
-  let offset = { x: 0, y: 0 };
+  // let isDragging = false; // dragging state
+  // let offset = { x: 0, y: 0 };
 
-  mainWindow.on('will-move', (event, newBounds) => {
-    if (isDragging) {
-      const { x, y } = screen.getCursorScreenPoint();
-      const newX = x + offset.x;
-      const newY = y + offset.y;
-      newBounds.x = newX;
-      newBounds.y = newY;
-    }
-  });
+  // mainWindow.on('will-move', (event, newBounds) => {
+  //   if (isDragging) {
+  //     const { x, y } = screen.getCursorScreenPoint();
+  //     const newX = x + offset.x;
+  //     const newY = y + offset.y;
+  //     newBounds.x = newX;
+  //     newBounds.y = newY;
+  //   }
+  // });
 
-  mainWindow.on('mousedown', (event) => {
-    if (event.button === 0) { // Only start dragging on left mouse button (0)
-      isDragging = true;
-      const { x, y } = screen.getCursorScreenPoint();
-      const { x: windowX, y: windowY } = mainWindow.getPosition();
-      offset.x = windowX - x;
-      offset.y = windowY - y;
-    }
-  });
+  // mainWindow.on('mousedown', (event) => {
+  //   if (event.button === 0) { // Only start dragging on left mouse button (0)
+  //     isDragging = true;
+  //     const { x, y } = screen.getCursorScreenPoint();
+  //     const { x: windowX, y: windowY } = mainWindow.getPosition();
+  //     offset.x = windowX - x;
+  //     offset.y = windowY - y;
+  //   }
+  // });
 
-  mainWindow.on('mouseup', () => {
-    isDragging = false;
-  });
+  // mainWindow.on('mouseup', () => {
+  //   isDragging = false;
+  // });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
+
+  setInterval(() => {
+    const uptime = os.uptime();
+    mainWindow.webContents.send('system-uptime', uptime);
+  }, 1000);
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -180,5 +188,10 @@ app
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
     });
+    setInterval(() => {
+      const uptime = os.uptime();
+      console.log('uptime-----------: ', uptime);
+      mainWindow.webContents.send('system-uptime', uptime);
+    }, 1000);
   })
   .catch(console.log);
