@@ -17,6 +17,8 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
 const os = require('os');
+const ejs = require('ejs');
+const fs = require('fs');
 
 class AppUpdater {
   constructor() {
@@ -131,7 +133,17 @@ const createWindow = async () => {
   //   isDragging = false;
   // });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  const templatePath = path.join(__dirname, 'index.ejs');
+  const html = ejs.render(fs.readFileSync(templatePath, 'utf8'), {
+    /* additional template variables if needed */
+  });
+
+  // Write the rendered HTML to a temporary file
+  const tempHTMLPath = path.join(__dirname, 'index.html');
+  fs.writeFileSync(tempHTMLPath, html);
+
+  // Load the temporary HTML file in the BrowserWindow
+  mainWindow.loadFile(tempHTMLPath);
 
   setInterval(() => {
     const uptime = os.uptime();

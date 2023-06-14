@@ -13,15 +13,5 @@
   </head>
   <body>
     <div id="root"></div>
-    <div id="time">T</div>
   </body>
-  <script>
-    const electron = require('electron');
-    const ipcRenderer = electron.ipcRenderer;
-  
-    ipcRenderer.on('system-uptime',(event,data) => {
-      window.alert(data);
-      document.getElementById('time').innerHTML = data.toFixed(2);
-    });
-  </script>
 </html>
